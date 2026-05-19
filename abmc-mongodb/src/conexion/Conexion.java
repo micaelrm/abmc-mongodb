@@ -5,18 +5,19 @@ import com.mongodb.client.MongoClients;
 import dev.morphia.Datastore;
 import dev.morphia.Morphia;
 
-// ejemplo: import modelo.Alumno; 
-
 public class Conexion {
     
     private static Datastore datastore = null;
 
-    public static Datastore getConexion() {
+    public static Datastore getDataStore(String host, String bd) {
         if (datastore == null) {
             try {
-                MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
+                MongoClient mongoClient = MongoClients.create(host);
                 
-                datastore = Morphia.createDatastore(mongoClient, "unlu_bd2");
+                datastore = Morphia.createDatastore(mongoClient, bd);
+                datastore.getMapper().mapPackage("modelo.Cliente");
+                datastore.getMapper().mapPackage("modelo.Factura");
+                datastore.ensureIndexes();
                 
                 System.out.println("Conexión a MongoDB establecida con éxito.");
                 
