@@ -4,6 +4,8 @@ import static conexion.Conexion.*;
 import dev.morphia.Datastore;
 import dev.morphia.query.filters.Filters;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
 import org.bson.types.ObjectId;
 
@@ -108,7 +110,7 @@ public class VistaGrafica extends javax.swing.JFrame {
             Object nuevoObj = clase.getDeclaredConstructor().newInstance(); 
             
             for (Field atributo : clase.getDeclaredFields()) {
-                if (atributo.getName().equals("id") && atributo.getType() == ObjectId.class) {
+                if (!(atributo.getName().equals("id") && atributo.getType() == ObjectId.class)) {
             
                     String valor = JOptionPane.showInputDialog("Ingrese " + atributo.getName());
                     atributo.setAccessible(true);
@@ -135,19 +137,18 @@ public class VistaGrafica extends javax.swing.JFrame {
             dataStore.save(nuevoObj);
             JOptionPane.showMessageDialog(this, "objeto guardado");
         } catch (Exception e) { 
-            e.printStackTrace(); 
-        } finally { 
-
+            e.printStackTrace();  
         }
     }//GEN-LAST:event_btnAltaActionPerformed
-
+    
     private void btnBajaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBajaActionPerformed
 
         try {
             Class<?> clase = Class.forName(clases.getSelectedItem().toString());
             String valorPK = JOptionPane.showInputDialog("Ingrese PK a borrar");
             
-            Object objetoBuscado = dataStore.find(clase).filter(Filters.eq("nro", valorPK)).first();
+            Object id = parseId(valorPK);
+            Object objetoBuscado = dataStore.find(clase).filter(Filters.eq("_id", id)).first();
 
             if (objetoBuscado != null) {
                 dataStore.delete(objetoBuscado);
@@ -171,48 +172,43 @@ public class VistaGrafica extends javax.swing.JFrame {
             if (objetoBuscado != null) {
                 for (Field atributo : clase.getDeclaredFields()) {
                     atributo.setAccessible(true);
-                    Object valorActual = atributo.get(objetoEncontrado);
+                    Object valorActual = atributo.get(objetoBuscado);
                     String nuevoValor = JOptionPane.showInputDialog("modificar " + atributo.getName(), valorActual);
 
                     if (nuevoValor != null) {
-                        if (atributo.getType() == int.class) atributo.set(objetoEncontrado, Integer.parseInt(nuevoValor));
-                        else if (atributo.getType() == double.class) atributo.set(objetoEncontrado, Double.parseDouble(nuevoValor));
-                        else if (atributo.getType() == String.class) atributo.set(objetoEncontrado, nuevoValor);
+                        if (atributo.getType() == int.class) atributo.set(objetoBuscado, Integer.parseInt(nuevoValor));
+                        else if (atributo.getType() == double.class) atributo.set(objetoBuscado, Double.parseDouble(nuevoValor));
+                        else if (atributo.getType() == String.class) atributo.set(objetoBuscado, nuevoValor);
                     }
                 }
-                em.getTransaction().commit();
+                dataStore.save(objetoBuscado);
                 JOptionPane.showMessageDialog(this, "actualizado");
             }
         } catch (Exception e) { e.printStackTrace(); } 
-        finally { 
-            if (em != null && em.isOpen()) { em.close(); }
-        }
     }//GEN-LAST:event_btnModActionPerformed
 
     private void btnConsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConsActionPerformed
         
         try {
-            em = emf.createEntityManager();
             Class<?> clase = Class.forName(clases.getSelectedItem().toString());
             String filtro = JOptionPane.showInputDialog("Ingrese PK (vacío para ver todos):");
             
             List<Object> lista = new ArrayList<>();
             if (filtro != null && !filtro.isEmpty()) {
-                Object objeto = em.find(clase, Integer.parseInt(filtro));
-                if (objeto != null) lista.add(objeto);
+                Object id = parseId(filtro);
+                Object objetoBuscado = dataStore.find(clase).filter(Filters.eq("_id", id)).first();
+                if (objetoBuscado != null) lista.add(objetoBuscado);
             } else {
-                lista = em.createQuery("SELECT e FROM " + clase.getSimpleName() + " e", Object.class).getResultList();
+                dataStore.find(clase).iterator().forEachRemaining(lista::add);
             }
             tabla.setModel(new Generico(clase, lista)); 
         } catch (Exception e) { e.printStackTrace(); } 
-        finally { 
-         
-        }
     }//GEN-LAST:event_btnConsActionPerformed
-
+   
     private Object parseId(String valor) {
         if (valor == null || valor.trim().isEmpty()) return null;
         if (ObjectId.isValid(valor)) return new ObjectId(valor);
+        return null;
     }
     
     public static void main(String args[]) {
@@ -229,3 +225,4 @@ public class VistaGrafica extends javax.swing.JFrame {
     private javax.swing.JTable tabla;
     // End of variables declaration//GEN-END:variables
 }
+

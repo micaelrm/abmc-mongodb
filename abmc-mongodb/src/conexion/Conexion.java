@@ -12,17 +12,17 @@ public class Conexion {
     public static Datastore getDataStore(String host, String bd) {
         if (datastore == null) {
             try {
-                MongoClient mongoClient = MongoClients.create(host);
+                MongoClient mongoCliente = MongoClients.create(host);
                 
-                datastore = Morphia.createDatastore(mongoClient, bd);
-                datastore.getMapper().mapPackage("modelo.Cliente");
-                datastore.getMapper().mapPackage("modelo.Factura");
+                datastore = Morphia.createDatastore(mongoCliente, bd);
+                //datastore.getMapper().mapPackage("modelo.Cliente");
+                //datastore.getMapper().mapPackage("modelo.Factura");
                 datastore.ensureIndexes();
                 
-                System.out.println("Conexión a MongoDB establecida con éxito.");
+                System.out.println("Conexión a MongoDB establecida con exito");
                 
             } catch (Exception e) {
-                System.err.println("Error crítico al conectar con MongoDB: " + e.getMessage());
+                System.err.println("Error al conectar con MongoDB: " + e.getMessage());
             }
         }
         return datastore;

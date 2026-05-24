@@ -1,6 +1,7 @@
 package modelo;
 
 import conexion.Conexion;
+import static conexion.Conexion.getDataStore;
 import dev.morphia.Datastore;
 
 public class Main {
@@ -8,7 +9,7 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("[!] Iniciando prueba de conexión a MongoDB ");
 
-        Datastore ds = Conexion.getConexion();
+        Datastore ds = getDataStore("mongodb://localhost:27017", "abmc-mongodb");
 
         if (ds != null) {
             System.out.println("[!] El objeto Datastore se inicializó correctamente.");
@@ -16,7 +17,7 @@ public class Main {
             try {
                 System.out.println("[!] Intentando registrar la entidad en Morphia...");
                 
-                //ds.getMapper().map(PruebaEntidad.class);
+                ds.getMapper().map(PruebaEntidad.class);
 
                 System.out.println("[!] Creando documento de prueba...");
                 
