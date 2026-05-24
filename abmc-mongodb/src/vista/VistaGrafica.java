@@ -147,7 +147,7 @@ public class VistaGrafica extends javax.swing.JFrame {
             Class<?> clase = Class.forName(clases.getSelectedItem().toString());
             String valorPK = JOptionPane.showInputDialog("Ingrese PK a borrar");
             
-            Object id = parseId(valorPK);
+            //Object id = parseId(valorPK);
             Object objetoBuscado = dataStore.find(clase).filter(Filters.eq("_id", id)).first();
 
             if (objetoBuscado != null) {

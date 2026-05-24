@@ -1,5 +1,8 @@
 package conexion;
 
+import modelo.Cliente;
+import modelo.Factura;
+
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import dev.morphia.Datastore;
@@ -15,8 +18,8 @@ public class Conexion {
                 MongoClient mongoCliente = MongoClients.create(host);
                 
                 datastore = Morphia.createDatastore(mongoCliente, bd);
-                //datastore.getMapper().mapPackage("modelo.Cliente");
-                //datastore.getMapper().mapPackage("modelo.Factura");
+                datastore.getMapper().map(Cliente.class);
+                datastore.getMapper().map(Factura.class);
                 datastore.ensureIndexes();
                 
                 System.out.println("Conexión a MongoDB establecida con exito");
