@@ -18,8 +18,9 @@ public class Cliente {
     
     public Cliente() { }
 
-    public Cliente(String nombre) {
+    public Cliente(String nombre, int dni) {
         this.nombre = nombre;
+        this.dni = dni;
     }
 
     public ObjectId getId() { return id; }

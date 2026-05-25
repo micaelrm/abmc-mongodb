@@ -122,8 +122,8 @@ public class VistaGrafica extends javax.swing.JFrame {
                     } else if (atributo.getType() == String.class) {
                         atributo.set(nuevoObj, valor);
                     } else {
-                        Object id = parseId(valor);
-                        Object relacion = dataStore.find(atributo.getType()).filter(Filters.eq("_id", id)).first();
+                        int pk = Integer.parseInt(valor);
+                        Object relacion = dataStore.find(atributo.getType()).filter(Filters.eq("dni", pk)).first();
                         if (relacion != null) {
                             atributo.set(nuevoObj, relacion);
                         } else {
@@ -145,10 +145,12 @@ public class VistaGrafica extends javax.swing.JFrame {
 
         try {
             Class<?> clase = Class.forName(clases.getSelectedItem().toString());
-            String valorPK = JOptionPane.showInputDialog("Ingrese PK a borrar");
+            String entrada = JOptionPane.showInputDialog("Ingrese PK a borrar");
+            int PKBuscada = Integer.parseInt(entrada);
             
-            //Object id = parseId(valorPK);
-            Object objetoBuscado = dataStore.find(clase).filter(Filters.eq("_id", id)).first();
+            Object objetoBuscado = null;
+            if (clase == modelo.Cliente.class) objetoBuscado = dataStore.find(clase).filter(Filters.eq("dni", PKBuscada)).first();
+            if (clase == modelo.Factura.class) objetoBuscado = dataStore.find(clase).filter(Filters.eq("nro", PKBuscada)).first();
 
             if (objetoBuscado != null) {
                 dataStore.delete(objetoBuscado);
@@ -163,22 +165,25 @@ public class VistaGrafica extends javax.swing.JFrame {
         
         try {
             Class<?> clase = Class.forName(clases.getSelectedItem().toString()); 
-            String PKBuscada = JOptionPane.showInputDialog("Ingrese PK a modificar");
-            if (PKBuscada == null || PKBuscada.trim().isEmpty()) return;
+            String entrada = JOptionPane.showInputDialog("Ingrese PK a modificar");
+            int PKBuscada = Integer.parseInt(entrada);
             
-            Object id = parseId(PKBuscada);
-            Object objetoBuscado = dataStore.find(clase).filter(Filters.eq("_id", id)).first();
-
+            Object objetoBuscado = null;
+            if (clase == modelo.Cliente.class) objetoBuscado = dataStore.find(clase).filter(Filters.eq("dni", PKBuscada)).first();
+            if (clase == modelo.Factura.class) objetoBuscado = dataStore.find(clase).filter(Filters.eq("nro", PKBuscada)).first();
+            
             if (objetoBuscado != null) {
                 for (Field atributo : clase.getDeclaredFields()) {
-                    atributo.setAccessible(true);
-                    Object valorActual = atributo.get(objetoBuscado);
-                    String nuevoValor = JOptionPane.showInputDialog("modificar " + atributo.getName(), valorActual);
+                    if (!(atributo.getName().equals("id") && atributo.getType() == ObjectId.class)) {
+                        atributo.setAccessible(true);
+                        Object valorActual = atributo.get(objetoBuscado);
+                        String nuevoValor = JOptionPane.showInputDialog("modificar " + atributo.getName(), valorActual);
 
-                    if (nuevoValor != null) {
-                        if (atributo.getType() == int.class) atributo.set(objetoBuscado, Integer.parseInt(nuevoValor));
-                        else if (atributo.getType() == double.class) atributo.set(objetoBuscado, Double.parseDouble(nuevoValor));
-                        else if (atributo.getType() == String.class) atributo.set(objetoBuscado, nuevoValor);
+                        if (nuevoValor != null) {
+                            if (atributo.getType() == int.class) atributo.set(objetoBuscado, Integer.parseInt(nuevoValor));
+                            else if (atributo.getType() == double.class) atributo.set(objetoBuscado, Double.parseDouble(nuevoValor));
+                            else if (atributo.getType() == String.class) atributo.set(objetoBuscado, nuevoValor);
+                        }
                     }
                 }
                 dataStore.save(objetoBuscado);
@@ -191,12 +196,15 @@ public class VistaGrafica extends javax.swing.JFrame {
         
         try {
             Class<?> clase = Class.forName(clases.getSelectedItem().toString());
-            String filtro = JOptionPane.showInputDialog("Ingrese PK (vacío para ver todos):");
+            String entrada = JOptionPane.showInputDialog("Ingrese PK (vacío para ver todos):");
+            
             
             List<Object> lista = new ArrayList<>();
-            if (filtro != null && !filtro.isEmpty()) {
-                Object id = parseId(filtro);
-                Object objetoBuscado = dataStore.find(clase).filter(Filters.eq("_id", id)).first();
+            if (entrada != null && !entrada.isEmpty()) {
+                int PKBuscada = Integer.parseInt(entrada);
+                Object objetoBuscado = null;
+                if (clase == modelo.Cliente.class) objetoBuscado = dataStore.find(clase).filter(Filters.eq("dni", PKBuscada)).first();
+                if (clase == modelo.Factura.class) objetoBuscado = dataStore.find(clase).filter(Filters.eq("nro", PKBuscada)).first();
                 if (objetoBuscado != null) lista.add(objetoBuscado);
             } else {
                 dataStore.find(clase).iterator().forEachRemaining(lista::add);
